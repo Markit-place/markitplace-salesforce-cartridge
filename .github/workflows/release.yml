@@ -1,0 +1,49 @@
+name: Release cartridge
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(jq -r .version int_markitplace/package.json)"
+          if [ "$tag" != "$pkg" ]; then
+            echo "Tag v${tag} does not match package.json version ${pkg}."
+            exit 1
+          fi
+          echo "version=${pkg}" >> "$GITHUB_OUTPUT"
+
+      - name: Build zip
+        run: |
+          zip -r "int_markitplace-${{ steps.version.outputs.version }}.zip" int_markitplace \
+            -x "*.DS_Store" -x "**/.DS_Store"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          {
+            echo "SFRA cartridge for Markitplace affiliate checkout and purchase notification."
+            echo
+            echo "Download \`int_markitplace-${VERSION}.zip\` and upload the \`int_markitplace\` folder into an existing SFRA code version. Install steps are in \`int_markitplace/README.md\` inside the zip."
+            echo
+            echo "Use this release page as the AppExchange install URL. Do not link the \`main\` branch."
+          } > release-notes.md
+          gh release create "$GITHUB_REF_NAME" \
+            "int_markitplace-${VERSION}.zip" \
+            --title "int_markitplace ${VERSION}" \
+            --notes-file release-notes.md
