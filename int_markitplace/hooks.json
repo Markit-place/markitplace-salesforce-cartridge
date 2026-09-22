@@ -1,0 +1,12 @@
+{
+  "hooks": [
+    {
+      "name": "app.order.created",
+      "script": "./cartridge/scripts/hooks/orderCreated.js"
+    },
+    {
+      "name": "dw.ocapi.shop.order.afterPOST",
+      "script": "./cartridge/scripts/hooks/orderCreated.js"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "int_markitplace",
+  "version": "1.0.0",
+  "description": "Markitplace affiliate checkout controller and purchase notify hook for SFRA",
+  "hooks": "./hooks.json"
+}
